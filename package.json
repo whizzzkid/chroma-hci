@@ -1,4 +1,4 @@
-{  
+{
   "name": "chrode",
   "description": "Chroma for Node",
   "version": "0.0.1",
@@ -9,7 +9,9 @@
     "build": "node-gyp build"
   },
   "dependencies": {
-    "bindings": "^1.2.1"
+    "bindings": "^1.2.1",
+    "keypress": "^0.2.1",
+    "terminal-keypress": "^0.4.4"
   },
   "devDependencies": {
     "nan": "^2.1.0",

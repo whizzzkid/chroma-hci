@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{4F48A318-E8B2-76E1-0DC5-55C47E297388}</ProjectGuid>
+    <ProjectGuid>{231CD4FB-A581-4B95-2E76-1BC304B2D63E}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Chroma</RootNamespace>
     <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
