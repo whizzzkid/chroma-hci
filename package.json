@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "bindings": "^1.2.1",
+    "express": "^4.15.2",
     "keypress": "^0.2.1",
+    "socket.io": "^1.7.3",
     "terminal-keypress": "^0.4.4"
   },
   "devDependencies": {

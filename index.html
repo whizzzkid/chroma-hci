@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+    <head>
+        <script src="//cdn.rawgit.com/dmauro/Keypress/master/keypress.js"></script>
+        <script src='node_modules/socket.io-client/dist/socket.io.js'></script>
+    </head>
+    <body>
+        <ul id='messages'></ul>
+        <script>
+            var listener = new window.keypress.Listener();
+            var socket = io();
+
+            var keys = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", 
+                "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x",
+                "y", "z", "ctrl", "shift", "alt", "space"];
+            
+            combs = [];
+
+            for (k in keys) {
+                combs.push({
+                    "keys": keys[k],
+                    "prevent_repeat": false,
+                    "on_keydown": function(event) {
+                        console.log('key pressed' + event.key);
+                        socket.emit('keypress', {key: event.key.toLowerCase()});
+                    },
+                    "on_keyup": function(event) {
+                        console.log('key up for ' + event.key)
+                        socket.emit('keyup', {key: event.key.toLowerCase()});
+                    }
+                });
+            }
+            listener.register_many(combs);
+            
+            
+
+            socket.on('welcome', function(data) {
+                addMessage(data.message);
+
+                // Respond with a message including this clients' id sent from the server
+                socket.emit('i am client', {data: 'foo!', id: data.id});
+            });
+            socket.on('time', function(data) {
+                addMessage(data.time);
+            });
+            socket.on('error', console.error.bind(console));
+            socket.on('message', console.log.bind(console));
+
+            function addMessage(message) {
+                var text = document.createTextNode(message),
+                    el = document.createElement('li'),
+                    messages = document.getElementById('messages');
+
+                el.appendChild(text);
+                messages.appendChild(el);
+            }
+        </script>
+    </body>
+</html>

@@ -1,9 +1,8 @@
-const keypress = require('keypress');
 const Chroma = require('./');
-
-// make process.stdin begin emitting "keypress" events 
-keypress(process.stdin);
-process.stdin.setRawMode(true);
+const express = require('express');
+const app = express();
+const http = require('http').Server(app);
+const io = require('socket.io')(http);
 
 /**
  * App Namespace
@@ -71,7 +70,10 @@ chromaHCIapp.CONSTANTS = {
 		'v': [4, 6],
 		'b': [4, 7],
 		'n': [4, 8],
-		'm': [4, 9]
+		'm': [4, 9],
+		'control': [5, 1],
+		'shift': [4, 1],
+		'alt': [5, 3]
 	}
 };
 
@@ -79,7 +81,7 @@ chromaHCIapp.CONSTANTS = {
  * Key Combinations
  */
 chromaHCIapp.keyCombinations = {
-	'c': {
+	'control': {
 		'e': 'Open the Garage Door',
 		'y': 'Turn on the Air Conditioner',
 		'b': 'Turn off the air conditioner',
@@ -91,7 +93,7 @@ chromaHCIapp.keyCombinations = {
 		'o': 'Dim Living Room Lights',
 		'k': 'Turn on Alarm System'
 	},
-	'a': {
+	'alt': {
 		'i': 'Close the Garage Door',
 		'n': 'Turn on the Water Heater',
 		'e': 'Adjust Temperature Up 1 degree',
@@ -109,7 +111,7 @@ chromaHCIapp.defaultGrid = function(){
 	for (let row = 0; row < this.CONSTANTS.keyboardRows; row++) {
 		this.grid[row] = [];
 		for (let col = 0; col < this.CONSTANTS.keyboardCols; col++) {
-			this.grid[row][col] = this.CONSTANTS.color.white;
+			this.grid[row][col] = this.CONSTANTS.color.black;
 		}
 	}
 };
@@ -140,18 +142,25 @@ chromaHCIapp.changeColor = function(key, color) {
  * @param {string} char
  * @param {object} key
  */
-chromaHCIapp.onKeyPressHandler = function(char, key) {
+chromaHCIapp.onKeyPressHandler = function(key) {
 	console.log('got "keypress"', key);
 	this.defaultGrid();
-	if (key && key.ctrl && key.name == 'c') {
-		process.exit();
-	}
-	if (key.name in this.keyCombinations) {
-		this.changeColor(key.name, this.CONSTANTS.color.red);
-		for (var k in this.keyCombinations[key.name]) {
+	if (key.key in this.keyCombinations) {
+		this.changeColor(key.key, this.CONSTANTS.color.red);
+		for (var k in this.keyCombinations[key.key]) {
 			this.changeColor(k, this.CONSTANTS.color.green);
 		}
 	}
+};
+
+chromaHCIapp.onKeyUpHandler = function(key) {
+	console.log('got "keyup"', key);
+	this.defaultGrid();
+};
+
+chromaHCIapp.socketListener = function(socket) {
+	socket.on('keypress', this.onKeyPressHandler.bind(this));
+	socket.on('keyup', this.onKeyUpHandler.bind(this));
 };
 
 /**
@@ -162,9 +171,16 @@ chromaHCIapp.init = function() {
 	this.grid = [];
 	this.defaultGrid();
 	if (this.SDK) {
-		console.log('Chroma SDK initialized.');
-		console.log('Starting Key Listener Daemon.');
-		process.stdin.on('keypress', this.onKeyPressHandler.bind(this));
+		console.log('Chroma SDK initialized...');
+		app.use(express.static(__dirname + '/'));
+		app.get('/', function(req, res){
+			console.log('Serving Key Collector Page...')
+			res.sendFile(__dirname + '/index.html');
+		});
+		http.listen(5000, function(){
+			console.log('listening on *:5000');
+		});
+		io.on('connection', this.socketListener.bind(this));
 		console.log('Starting Looper');
 		setInterval(this.looper.bind(this), this.CONSTANTS.refreshInterval);
 	} else {
