@@ -1,0 +1,99 @@
+body {
+  background-color: #eeeeee;
+  font-family: 'Roboto', sans-serif;
+}
+
+div.command_center {
+  position: absolute;
+  height: 500px;
+  top: 50%;
+  margin-top: -250px;
+  width: 800px;
+  left: 50%;
+  margin-left: -400px;
+  border: 3px solid black;
+  padding: 10px;
+  text-align: center;
+  background-color: #eeeeee;
+  z-index: 1;
+}
+
+div.helper {
+  z-index: 2;
+  visibility: hidden;
+}
+
+p#command {
+  height: 100px;
+  font-size: 48px;
+}
+
+p#result {
+  height: 100px;
+  font-size: 32px;
+}
+
+#help_dropdown {
+  margin-top: 15px
+}
+
+#help_dropdown ul {
+  list-style: none;
+  position: relative;
+  float: left;
+  margin: 0;
+  padding: 0
+}
+
+#help_dropdown ul a {
+  display: block;
+  color: #333;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 32px;
+  padding: 0 15px;
+}
+
+#help_dropdown ul li {
+  position: relative;
+  float: left;
+  margin: 0;
+  padding: 0
+}
+
+#help_dropdown ul li.current-menu-item {
+  background: #ddd
+}
+
+#help_dropdown ul li:hover {
+  background: #f6f6f6
+}
+
+#help_dropdown ul ul {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #fff;
+  padding: 0;
+}
+
+#help_dropdown ul ul li {
+  float: none;
+  width: 200px
+}
+
+#help_dropdown ul ul a {
+  line-height: 120%;
+  padding: 10px 15px;
+}
+
+#help_dropdown ul ul ul {
+  top: 0;
+  left: 100%;
+}
+
+#help_dropdown ul li:hover>ul {
+  display: block
+}

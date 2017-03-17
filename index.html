@@ -2,15 +2,64 @@
 <html>
     <head>
         <link href="//fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+        <link rel="stylesheet" href="//127.0.0.1:5000/style.css">
+    </head>
+    <body>
+        <div class="command_center">
+            <p id="command"></p>
+            <p id="result"></p>
+            <nav id="help_dropdown">
+                <ul>
+                    <li>
+                        <a href="#">Help</a>
+                        <ul>
+                            <li>
+                                <a href="#">Commands</a>
+                                <ul>
+                                    <li>
+                                        <a href="#">Home Automation</a>
+                                        <ul>
+                                            <a onclick="helpCenter.style.visibility='visible'">Show Commands</a>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <div id="help_center" class="command_center helper">
+            <a onclick="helpCenter.style.visibility='hidden'">Hide Commands</a>
+            <p>
+                <b>CTRL + S : </b>Turn up living room lights<br>
+                <b>CTRL + A : </b>Turn down living room lights<br>
+                <b>CTRL + G : </b>Raise the upstairs blinds<br>
+                <b>CTRL + B : </b>Lower the upstairs blinds<br>
+                <b>CTRL + M : </b>Turn off all lights<br>
+                <b>CTRL + U : </b>Set lights to party mode<br>
+                <b>CTRL + P : </b>Turn on/off porch lights<br>
+                <b>ALT + O : </b>Adjust temperature up 1 deg<br>
+                <b>ALT + L : </b>Adjust temperature down 1 deg<br>
+                <b>ALT + T : </b>Increase bedroom fan speed<br>
+                <b>ALT + R : </b>Decrease bedroom fan speed<br>
+                <b>ALT + A : </b>Run the dehumidifier<br>
+                <b>ALT + N : </b>Change air conditioner mode<br>
+                <b>ALT + C : </b>Turn on/off dining room fan<br>
+                <b>SHIFT + I : </b>Open the garage door<br>
+                <b>SHIFT + U : </b>Close the garage door<br>
+                <b>SHIFT + F : </b>Lock the main door<br>
+                <b>SHIFT + V : </b>Unlock the main door<br>
+                <b>SHIFT + Q : </b>Call emergency services<br>
+                <b>SHIFT + X : </b>Test the smoke detector<br>
+                <b>SHIFT + N : </b>Turn on/off alarm system<br>
+            </p>
+            <a onclick="helpCenter.style.visibility='hidden'">Hide Commands</a>
+        </div>
         <script src="//cdn.rawgit.com/dmauro/Keypress/master/keypress.js"></script>
         <script src='//127.0.0.1:5000/node_modules/socket.io-client/dist/socket.io.js'></script>
-    </head>
-    <body style="background-color: #eeeeee; font-family: 'Roboto', sans-serif;">
-        <div style="position:absolute; height: 300px; top:50%; margin-top: -150px; width: 800px; left:50%; margin-left: -400px; border: 3px solid black; padding: 10px; text-align:center; ">
-            <p id="command"  style="font-size: 48px;"></p>
-            <p id="result" style="font-size: 32px;"></p>
-        </div>
         <script>
+            var helpCenter = document.getElementById('help_center');
             var listener = new window.keypress.Listener();
             var socket = io();
 
@@ -25,12 +74,16 @@
                     "keys": keys[k],
                     "prevent_repeat": false,
                     "on_keydown": function(event) {
-                        console.log('key pressed' + event.key);
-                        socket.emit('keypress', {key: event.key.toLowerCase()});
+                        if(helpCenter.style.visibility == "hidden") {
+                           console.log('key pressed' + event.key);
+                            socket.emit('keypress', {key: event.key.toLowerCase()});
+                        }
                     },
                     "on_keyup": function(event) {
-                        console.log('key up for ' + event.key)
-                        socket.emit('keyup', {key: event.key.toLowerCase()});
+                        if(helpCenter.style.visibility == "hidden") {
+                            console.log('key up for ' + event.key)
+                            socket.emit('keyup', {key: event.key.toLowerCase()});
+                        }
                     }
                 });
             }

@@ -46,6 +46,9 @@ chromaHCIapp.CONSTANTS = {
     'red': { Red: 255, Green: 0, Blue: 0 },
     'green': { Red: 0, Green: 255, Blue: 0 },
     'blue': { Red: 0, Green: 0, Blue: 255 },
+    'yellow': { Red: 255, Green: 255, Blue: 0 },
+    'magenta': { Red: 255, Green: 0, Blue: 255 },
+    'cyan': { Red: 0, Green: 255, Blue: 255 },
   },
   // Key Mappings.
   'keyname': {
@@ -168,20 +171,31 @@ chromaHCIapp.generateDefaultGrid = function () {
       grid[row][col] = this.CONSTANTS.color.white;
     }
   }
+  return grid;
+};
+
+
+/**
+ * Generates a combination lit layout.
+ *
+ * @return {object} grid.
+ */
+chromaHCIapp.generateLitGrid = function () {
+  let grid = this.generateDefaultGrid();
   for (let c in this.allPossibleKeyCombinations) {
     let command = this.allPossibleKeyCombinations[c];
     let color = false;
     let key = '';
     if (c == 'control') {
-      color = this.CONSTANTS.color.red;
+      color = this.CONSTANTS.color.yellow;
       key = this.CONSTANTS.keyname['CTRL'].map;
     }
     if (c == 'shift') {
-      color = this.CONSTANTS.color.green;
+      color = this.CONSTANTS.color.magenta;
       key = this.CONSTANTS.keyname['SHIFT'].map;
     }
     if (c == 'alt') {
-      color = this.CONSTANTS.color.blue;
+      color = this.CONSTANTS.color.cyan;
       key = this.CONSTANTS.keyname['ALT'].map;
     }
     if (color) {
@@ -193,7 +207,7 @@ chromaHCIapp.generateDefaultGrid = function () {
     }
   }
   return grid;
-};
+}
 
 
 /**
@@ -202,6 +216,10 @@ chromaHCIapp.generateDefaultGrid = function () {
 chromaHCIapp.defaultGrid = function () {
   // Copy the default layout.
   this.grid = JSON.parse(JSON.stringify(this.defaultGridLayout));
+};
+
+chromaHCIapp.litGrid = function () {
+  this.grid = JSON.parse(JSON.stringify(this.litGridLayout));
 };
 
 
@@ -283,6 +301,7 @@ chromaHCIapp.translateAllKeyNamesToMap = function () {
   return keyNameMap;
 }
 
+
 /**
  * Lights up all possible combinations for a given key
  *
@@ -290,11 +309,11 @@ chromaHCIapp.translateAllKeyNamesToMap = function () {
  */
 chromaHCIapp.lightUpAllPossibleCombintationsForKeyName = function (keyName) {
   // Change color for key pressed to red
-  this.changeColor(this.keyNameToMap[keyName], this.CONSTANTS.color.red);
+  this.changeColor(this.keyNameToMap[keyName], this.CONSTANTS.color.white);
   // Change all possiblities to red.
   let comb = this.allPossibleKeyCombinations[keyName]
   for (let k in comb) {
-    this.changeColor(comb[k], this.CONSTANTS.color.green);
+    this.changeColor(comb[k], this.CONSTANTS.color.blue);
   }
 };
 
@@ -317,10 +336,10 @@ chromaHCIapp.getKeyByKeyName = function (keyName) {
  * Lights up pressed keys.
  */
 chromaHCIapp.lightUpPressedKeys = function () {
+  let color = this.CONSTANTS.color.red;
+  color = (this.isCorrect) ? this.CONSTANTS.color.green : color;
   for (let k in this.pressedKeyStack) {
-    this.changeColor(
-        this.keyNameToMap[this.pressedKeyStack[k]],
-        this.CONSTANTS.color.blue);
+    this.changeColor( this.keyNameToMap[this.pressedKeyStack[k]], color );
   }
 };
 
@@ -330,6 +349,7 @@ chromaHCIapp.lightUpPressedKeys = function () {
  */
 chromaHCIapp.lightingManager = function () {
   if (this.lit) {
+    this.defaultGrid();
     if (this.pressedKeyStack.length == 1) {
       // When one key is pressed.
       this.lightUpAllPossibleCombintationsForKeyName(this.pressedKeyStack[0]);
@@ -338,7 +358,7 @@ chromaHCIapp.lightingManager = function () {
       this.lightUpPressedKeys();
     } else {
       // Whatever
-      this.defaultGrid();
+      this.litGrid();
     }
   } else {
     // We're not in lighting mode.
@@ -356,7 +376,6 @@ chromaHCIapp.onKeyPressHandler = function (key) {
     // Maintain pressed key stack here.
     this.pressedKeyStack.push(key.key);
     // Manage the lighting here.
-    this.lightingManager();
     this.log('Key Press', this.pressedKeyStack);
     if (this.pressedKeyStack.length == 2) {
       // Stop listening for any more keys.
@@ -368,8 +387,10 @@ chromaHCIapp.onKeyPressHandler = function (key) {
       }
       this.sendResult();
     }
+    this.lightingManager();
   }
 };
+
 
 /**
  * Handles the on KeyUp Event.
@@ -421,7 +442,6 @@ chromaHCIapp.sendResult = function () {
  * Manages which command needs to be sent.
  */
 chromaHCIapp.commandManager = function () {
-  this.defaultGrid();
   let wait = 0;
   if ((this.trainCommandDeck.length % this.CONSTANTS.blockSize) == 0) {
     // If we want the user to rest.
@@ -449,6 +469,7 @@ chromaHCIapp.initNextCommand = function () {
   this.key2 = this.CONSTANTS.keyname[this.activeCommand.key_2];
   this.isCorrect = true;
   this.pressedKeyStack = [];
+  this.lightingManager();
   this.sendCommand();
 }
 
@@ -462,7 +483,7 @@ chromaHCIapp.initNextCommand = function () {
 chromaHCIapp.handleNewUser = function (req, res) {
   res.sendFile(__dirname + '/index.html');
   this.user = req.params.user;
-  this.lit = (req.params.lit == 'backlit') ? true : false;
+  this.lit = (req.params.lit == 'backlit') ? true : this.lit;
   this.pressedKeyStack = [];
   this.activeCommand;
   this.block = 0;
@@ -526,6 +547,7 @@ chromaHCIapp.init = function () {
   this.grid = [];
   this.user = '';
   this.block = '';
+  this.lit = false;
   this.listening = false;
   // Generate all possible combintations and keep them stored.
   this.allPossibleKeyCombinations = this.generateAllPossibleKeyCombinations();
@@ -533,7 +555,8 @@ chromaHCIapp.init = function () {
   this.keyNameToMap = this.translateAllKeyNamesToMap();
   // Store the default grid layout
   this.defaultGridLayout = this.generateDefaultGrid();
-  this.defaultGrid();
+  this.litGridLayout = this.generateLitGrid();
+  this.lightingManager();
   if (this.SDK) {
     this.log('Msg', 'Chroma SDK initialized...');
     this.serve();
