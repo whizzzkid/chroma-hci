@@ -168,6 +168,30 @@ chromaHCIapp.generateDefaultGrid = function () {
       grid[row][col] = this.CONSTANTS.color.white;
     }
   }
+  for (let c in this.allPossibleKeyCombinations) {
+    let command = this.allPossibleKeyCombinations[c];
+    let color = false;
+    let key = '';
+    if (c == 'control') {
+      color = this.CONSTANTS.color.red;
+      key = this.CONSTANTS.keyname['CTRL'].map;
+    }
+    if (c == 'shift') {
+      color = this.CONSTANTS.color.green;
+      key = this.CONSTANTS.keyname['SHIFT'].map;
+    }
+    if (c == 'alt') {
+      color = this.CONSTANTS.color.blue;
+      key = this.CONSTANTS.keyname['ALT'].map;
+    }
+    if (color) {
+      grid[key[0]][key[1]] = color;
+      for (let k in command) {
+        key = command[k];
+        grid[key[0]][key[1]] = color;
+      }
+    }
+  }
   return grid;
 };
 

@@ -6,7 +6,7 @@
         <script src='//127.0.0.1:5000/node_modules/socket.io-client/dist/socket.io.js'></script>
     </head>
     <body style="background-color: #eeeeee; font-family: 'Roboto', sans-serif;">
-        <div style="position:absolute; height: 300px; top:50%; margin-top: -150px; width: 600px; left:50%; margin-left: -300px; border: 3px solid black; padding: 10px; text-align:center; ">
+        <div style="position:absolute; height: 300px; top:50%; margin-top: -150px; width: 800px; left:50%; margin-left: -400px; border: 3px solid black; padding: 10px; text-align:center; ">
             <p id="command"  style="font-size: 48px;"></p>
             <p id="result" style="font-size: 32px;"></p>
         </div>
@@ -14,10 +14,10 @@
             var listener = new window.keypress.Listener();
             var socket = io();
 
-            var keys = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", 
+            var keys = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k",
                 "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x",
                 "y", "z", "ctrl", "shift", "alt"];
-            
+
             combs = [];
 
             for (k in keys) {
