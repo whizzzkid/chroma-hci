@@ -443,7 +443,16 @@ chromaHCIapp.sendResult = function () {
  */
 chromaHCIapp.commandManager = function () {
   let wait = 0;
-  if ((this.trainCommandDeck.length % this.CONSTANTS.blockSize) == 0) {
+  if (this.commandDeck.length == 0 && this.currentCommandDeck == 'train') {
+    this.currentCommandDeck = 'test';
+    this.commandDeck = this.generateCommandDeck('efreq');
+    this.updateFrontEnd('command', 'Starting next phase in 30 secs.');
+    this.updateFrontEnd('result', '');
+    this.log('Test Deck', 'Command Order [' + this.commandDeck + ']');
+    wait = this.CONSTANTS.breakBetweenBlocks;
+  }
+  if (this.currentCommandDeck == 'train' &&
+      (this.commandDeck.length % this.CONSTANTS.blockSize) == 0) {
     // If we want the user to rest.
     this.updateFrontEnd('command', 'Rest, next command in 30 Sec.');
     this.updateFrontEnd('result', '');
@@ -464,7 +473,7 @@ chromaHCIapp.commandManager = function () {
  */
 chromaHCIapp.initNextCommand = function () {
   // Reset everything.
-  this.activeCommand = this.CONSTANTS.commandList[this.trainCommandDeck.pop()];
+  this.activeCommand = this.CONSTANTS.commandList[this.commandDeck.pop()];
   this.key1 = this.CONSTANTS.keyname[this.activeCommand.key_1];
   this.key2 = this.CONSTANTS.keyname[this.activeCommand.key_2];
   this.isCorrect = true;
@@ -487,9 +496,11 @@ chromaHCIapp.handleNewUser = function (req, res) {
   this.pressedKeyStack = [];
   this.activeCommand;
   this.block = 0;
-  this.trainCommandDeck = this.generateCommandDeck('tfreq');
+  this.currentCommandDeck = 'train';
+  // Starting with train commands.
+  this.commandDeck = this.generateCommandDeck('tfreq');
   this.log('Msg', 'New User [backlit = ' + this.lit + ']');
-  this.log('Msg', 'Command Order [' + this.trainCommandDeck + ']');
+  this.log('Train Deck', 'Command Order [' + this.commandDeck + ']');
   socket.on('connection', this.socketListener.bind(this));
 };
 

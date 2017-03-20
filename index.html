@@ -11,30 +11,37 @@
             <nav id="help_dropdown">
                 <ul>
                     <li>
-                        <a href="#">Help</a>
+                        <a href="#">Home Automation Command Help</a>
                         <ul>
-                            <li>
-                                <a href="#">Home Automation</a>
-                                <ul>
-                                    <li>
-                                        <a onclick="helpCenter.style.visibility='visible'">Show Commands</a>
-                                    </li>
-                                </ul>
-                            </li>
+                            <li><a onclick="ctrlHelpCenter.style.visibility='visible'">Cooling and Heating</a></li>
+                            <li><a onclick="altHelpCenter.style.visibility='visible'">Lighting</a></li>
+                            <li><a onclick="shiftHelpCenter.style.visibility='visible'">Security</a></li>
                         </ul>
                     </li>
                 </ul>
             </nav>
         </div>
-        <div id="help_center" class="command_center helper">
-            <a onclick="helpCenter.style.visibility='hidden'">Hide Commands</a>
-            <p id="command_list"></p>
-            <a onclick="helpCenter.style.visibility='hidden'">Hide Commands</a>
+        <div id="ctrl_help_center" class="command_center helper">
+            <a onclick="ctrlHelpCenter.style.visibility='hidden'">Hide Commands</a>
+            <p id="ctrl_command_list"></p>
+            <a onclick="ctrlHelpCenter.style.visibility='hidden'">Hide Commands</a>
+        </div>
+        <div id="alt_help_center" class="command_center helper">
+            <a onclick="altHelpCenter.style.visibility='hidden'">Hide Commands</a>
+            <p id="alt_command_list"></p>
+            <a onclick="altHelpCenter.style.visibility='hidden'">Hide Commands</a>
+        </div>
+        <div id="shift_help_center" class="command_center helper">
+            <a onclick="shiftHelpCenter.style.visibility='hidden'">Hide Commands</a>
+            <p id="shift_command_list"></p>
+            <a onclick="shiftHelpCenter.style.visibility='hidden'">Hide Commands</a>
         </div>
         <script src="//cdn.rawgit.com/dmauro/Keypress/master/keypress.js"></script>
         <script src='//127.0.0.1:5000/node_modules/socket.io-client/dist/socket.io.js'></script>
         <script>
-            var helpCenter = document.getElementById('help_center');
+            var ctrlHelpCenter = document.getElementById('ctrl_help_center');
+            var altHelpCenter = document.getElementById('alt_help_center');
+            var shiftHelpCenter = document.getElementById('shift_help_center');
             var listener = new window.keypress.Listener();
             var socket = io();
 
@@ -49,13 +56,17 @@
                     "keys": keys[k],
                     "prevent_repeat": false,
                     "on_keydown": function(event) {
-                        if(helpCenter.style.visibility == "hidden") {
+                        if(ctrlHelpCenter.style.visibility == "hidden" &&
+                           altHelpCenter.style.visibility == "hidden" &&
+                           shiftHelpCenter.style.visibility == "hidden" ) {
                            console.log('key pressed' + event.key);
                             socket.emit('keypress', {key: event.key.toLowerCase()});
                         }
                     },
                     "on_keyup": function(event) {
-                        if(helpCenter.style.visibility == "hidden") {
+                        if(ctrlHelpCenter.style.visibility == "hidden" &&
+                           altHelpCenter.style.visibility == "hidden" &&
+                           shiftHelpCenter.style.visibility == "hidden") {
                             console.log('key up for ' + event.key)
                             socket.emit('keyup', {key: event.key.toLowerCase()});
                         }
@@ -78,16 +89,36 @@
                 document.getElementById(id).innerText = text;
             }
             function updateCommands(commands) {
-                var list = document.getElementById('command_list');
-                list.innerHTML = '';
-                commands = JSON.parse(commands);
+                var commands = JSON.parse(commands);
+                var ctrlCommands = '';
+                var shiftCommands = '';
+                var altCommands = '';
                 for (var i in commands) {
                     var command = commands[i];
                     var commandString = '<b>' + command.key_1 +' + ' +
                         command.key_2 + ' : </b>' + command.command + '<br>';
-                    list.innerHTML = list.innerHTML + commandString;
+                    if (command.key_1 == 'CTRL') {
+                        ctrlCommands = ctrlCommands + commandString;
+                    }
+                    if (command.key_1 == 'ALT') {
+                        altCommands = altCommands + commandString;
+                    }
+                    if (command.key_1 == 'SHIFT') {
+                        shiftCommands = shiftCommands + commandString;
+                    }
                 }
-                helpCenter.style.visibility='hidden';
+                var list = document.getElementById('ctrl_command_list');
+                list.innerHTML = '';
+                list.innerHTML = ctrlCommands;
+                list = document.getElementById('alt_command_list');
+                list.innerHTML = '';
+                list.innerHTML = altCommands;
+                list = document.getElementById('shift_command_list');
+                list.innerHTML = '';
+                list.innerHTML = shiftCommands;
+                ctrlHelpCenter.style.visibility='hidden';
+                altHelpCenter.style.visibility='hidden';
+                shiftHelpCenter.style.visibility='hidden';
             }
         </script>
     </body>
