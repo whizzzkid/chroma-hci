@@ -82,13 +82,6 @@
                 list.innerHTML = '';
                 commands = JSON.parse(commands);
                 for (var i in commands) {
-                    if (i == 0) {
-                        list.innerHTML = list.innerHTML + "<b style=\"text-decoration: underline;\">ALT Keys: Lighting</b><br>";
-                    } else if (i == 7) {
-                        list.innerHTML = list.innerHTML + "<br><b style=\"text-decoration: underline;\">CTRL Keys: Cooling and Heating</b><br>";
-                    } else if (i == 14) {
-                        list.innerHTML = list.innerHTML + "<br><b style=\"text-decoration: underline;\">SHIFT Keys: Security</b><br>";
-                    }
                     var command = commands[i];
                     var commandString = '<b>' + command.key_1 +' + ' +
                         command.key_2 + ' : </b>' + command.command + '<br>';
