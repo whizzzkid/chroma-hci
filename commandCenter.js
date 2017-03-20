@@ -187,15 +187,15 @@ chromaHCIapp.generateLitGrid = function () {
     let color = false;
     let key = '';
     if (c == 'control') {
-      color = this.CONSTANTS.color.yellow;
+      color = this.CONSTANTS.color.red;
       key = this.CONSTANTS.keyname['CTRL'].map;
     }
     if (c == 'shift') {
-      color = this.CONSTANTS.color.magenta;
+      color = this.CONSTANTS.color.green;
       key = this.CONSTANTS.keyname['SHIFT'].map;
     }
     if (c == 'alt') {
-      color = this.CONSTANTS.color.cyan;
+      color = this.CONSTANTS.color.blue;
       key = this.CONSTANTS.keyname['ALT'].map;
     }
     if (color) {
