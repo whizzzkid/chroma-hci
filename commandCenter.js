@@ -501,6 +501,7 @@ chromaHCIapp.handleNewUser = function (req, res) {
 chromaHCIapp.socketListener = function (socket) {
   socket.on('keypress', this.onKeyPressHandler.bind(this));
   socket.on('keyup', this.onKeyUpHandler.bind(this));
+  socket.emit('commandList', JSON.stringify(this.CONSTANTS.commandList));
   this.commandManager();
 };
 

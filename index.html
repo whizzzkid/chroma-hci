@@ -28,29 +28,7 @@
         </div>
         <div id="help_center" class="command_center helper">
             <a onclick="helpCenter.style.visibility='hidden'">Hide Commands</a>
-            <p>
-                <b>CTRL + S : </b>Turn up living room lights<br>
-                <b>CTRL + A : </b>Turn down living room lights<br>
-                <b>CTRL + G : </b>Raise the upstairs blinds<br>
-                <b>CTRL + B : </b>Lower the upstairs blinds<br>
-                <b>CTRL + M : </b>Turn off all lights<br>
-                <b>CTRL + U : </b>Set lights to party mode<br>
-                <b>CTRL + P : </b>Turn on/off porch lights<br>
-                <b>ALT + O : </b>Adjust temperature up 1 deg<br>
-                <b>ALT + L : </b>Adjust temperature down 1 deg<br>
-                <b>ALT + T : </b>Increase bedroom fan speed<br>
-                <b>ALT + R : </b>Decrease bedroom fan speed<br>
-                <b>ALT + A : </b>Run the dehumidifier<br>
-                <b>ALT + N : </b>Change air conditioner mode<br>
-                <b>ALT + C : </b>Turn on/off dining room fan<br>
-                <b>SHIFT + I : </b>Open the garage door<br>
-                <b>SHIFT + U : </b>Close the garage door<br>
-                <b>SHIFT + F : </b>Lock the main door<br>
-                <b>SHIFT + V : </b>Unlock the main door<br>
-                <b>SHIFT + Q : </b>Call emergency services<br>
-                <b>SHIFT + X : </b>Test the smoke detector<br>
-                <b>SHIFT + N : </b>Turn on/off alarm system<br>
-            </p>
+            <p id="command_list"></p>
             <a onclick="helpCenter.style.visibility='hidden'">Hide Commands</a>
         </div>
         <script src="//cdn.rawgit.com/dmauro/Keypress/master/keypress.js"></script>
@@ -85,11 +63,8 @@
                 });
             }
             listener.register_many(combs);
-
-            socket.on('welcome', function(data) {
-                addMessage(data.message);
-                // Respond with a message including this clients' id sent from the server
-                socket.emit('i am client', {data: 'foo!', id: data.id});
+            socket.on('commandList', function(data) {
+                updateCommands(data);
             });
             socket.on('command', function(data) {
                 updateText('command', data.msg);
@@ -99,9 +74,19 @@
             });
             socket.on('error', console.error.bind(console));
             socket.on('message', console.log.bind(console));
-
             function updateText(id, text) {
                 document.getElementById(id).innerText = text;
+            }
+            function updateCommands(commands) {
+                var list = document.getElementById('command_list');
+                list.innerHTML = '';
+                commands = JSON.parse(commands);
+                for (var i in commands) {
+                    var command = commands[i];
+                    var commandString = '<b>' + command.key_1 +' + ' +
+                        command.key_2 + ' : </b>' + command.command + '<br>';
+                    list.innerHTML = list.innerHTML + commandString;
+                }
             }
         </script>
     </body>
