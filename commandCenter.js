@@ -484,6 +484,12 @@ chromaHCIapp.commandManager = function () {
   let wait = 0;
   if (this.commandDeck.length == 0) {
     // Start the testing phase.
+    if (this.currentCommandDeck == 'test') {
+      this.updateFrontEnd('command', 'Test Finished');
+      this.updateFrontEnd('result', 'Thanks');
+      this.log('Test Deck', 'Command Order [' + this.commandDeck + ']');
+      return;
+    }
     if (this.currentCommandDeck == 'train') {
       this.currentCommandDeck = 'test';
       this.lit = false;
@@ -493,12 +499,6 @@ chromaHCIapp.commandManager = function () {
       socket.emit('hide_help', { help: 'hide' });
       this.log('Test Deck', 'Command Order [' + this.commandDeck + ']');
       wait = this.CONSTANTS.breakBetweenBlocks;
-    }
-    if (this.currentCommandDeck == 'test') {
-      this.updateFrontEnd('command', 'Test Finished');
-      this.updateFrontEnd('result', 'Thanks');
-      this.log('Test Deck', 'Command Order [' + this.commandDeck + ']');
-      return;
     }
   }
   if (this.currentCommandDeck == 'train' &&
