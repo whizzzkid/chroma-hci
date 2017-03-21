@@ -13,9 +13,9 @@
                     <li>
                         <a href="#">Home Automation Command Help</a>
                         <ul>
-                            <li><a onclick="ctrlHelpCenter.style.visibility='visible'">Cooling and Heating</a></li>
-                            <li><a onclick="altHelpCenter.style.visibility='visible'">Lighting</a></li>
-                            <li><a onclick="shiftHelpCenter.style.visibility='visible'">Security</a></li>
+                            <li><a onclick="ctrlHelpCenter.style.visibility='visible'">Cooling and Heating (CTRL)</a></li>
+                            <li><a onclick="altHelpCenter.style.visibility='visible'">Lighting (ALT)</a></li>
+                            <li><a onclick="shiftHelpCenter.style.visibility='visible'">Security (SHIFT)</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -82,6 +82,9 @@
             });
             socket.on('result', function(data){
                 updateText('result', data.msg);
+            });
+            socket.on('hide_help', function(data) {
+                document.getElementById('help_dropdown').style.visibility = 'hidden';
             });
             socket.on('error', console.error.bind(console));
             socket.on('message', console.log.bind(console));

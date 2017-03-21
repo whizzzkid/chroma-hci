@@ -81,6 +81,9 @@ chromaHCIapp.CONSTANTS = {
     'CTRL': { 'name': 'control', 'map': [5, 1] },
     'SHIFT': { 'name': 'shift', 'map': [4, 1] },
     'ALT': { 'name': 'alt', 'map': [5, 3] },
+    'CTRLR': { 'name': 'control_r', 'map': [5, 14] },
+    'SHIFTR': { 'name': 'shift_r', 'map': [4, 14] },
+    'ALTR': { 'name': 'alt_r', 'map': [5, 11] }
   },
   // We came up with a random command list
   'commandList': [
@@ -168,7 +171,7 @@ chromaHCIapp.generateDefaultGrid = function () {
   for (let row = 0; row < this.CONSTANTS.keyboardRows; row++) {
     grid[row] = [];
     for (let col = 0; col < this.CONSTANTS.keyboardCols; col++) {
-      grid[row][col] = this.CONSTANTS.color.white;
+      grid[row][col] = this.CONSTANTS.color.black;
     }
   }
   return grid;
@@ -186,20 +189,25 @@ chromaHCIapp.generateLitGrid = function () {
     let command = this.allPossibleKeyCombinations[c];
     let color = false;
     let key = '';
+    let keyr = '';
     if (c == 'control') {
-      color = this.CONSTANTS.color.red;
+      color = this.getColorByKeyName(c);
       key = this.CONSTANTS.keyname['CTRL'].map;
+      keyr = this.CONSTANTS.keyname['CTRLR'].map;
     }
     if (c == 'shift') {
-      color = this.CONSTANTS.color.green;
+      color = this.getColorByKeyName(c);
       key = this.CONSTANTS.keyname['SHIFT'].map;
+      keyr = this.CONSTANTS.keyname['SHIFTR'].map;
     }
     if (c == 'alt') {
-      color = this.CONSTANTS.color.blue;
+      color = this.getColorByKeyName(c);
       key = this.CONSTANTS.keyname['ALT'].map;
+      keyr = this.CONSTANTS.keyname['ALTR'].map;
     }
     if (color) {
       grid[key[0]][key[1]] = color;
+      grid[keyr[0]][keyr[1]] = color;
       for (let k in command) {
         key = command[k];
         grid[key[0]][key[1]] = color;
@@ -231,6 +239,23 @@ chromaHCIapp.looper = function () {
   Chroma.Keyboard.SetCustom(this.grid);
 };
 
+
+chromaHCIapp.changeColorByKeyName = function (keyName, color) {
+  let keyMap = this.keyNameToMap[keyName];
+  this.changeColor(keyMap, color);
+  if (keyName == 'control') {
+    keyMap = this.keyNameToMap['control_r'];
+    this.changeColor(keyMap, color);
+  }
+  if (keyName == 'alt') {
+    keyMap = this.keyNameToMap['alt_r'];
+    this.changeColor(keyMap, color);
+  }
+  if (keyName == 'shift') {
+    keyMap = this.keyNameToMap['shift_r'];
+    this.changeColor(keyMap, color);
+  }
+}
 
 /**
  * changes key color by key name.
@@ -302,6 +327,19 @@ chromaHCIapp.translateAllKeyNamesToMap = function () {
 }
 
 
+chromaHCIapp.getColorByKeyName = function (keyName) {
+  if (keyName == 'control') {
+    return this.CONSTANTS.color.red;
+  }
+  if (keyName == 'alt') {
+    return this.CONSTANTS.color.green;
+  }
+  if (keyName == 'shift') {
+    return this.CONSTANTS.color.blue;
+  }
+  return this.CONSTANTS.color.white;
+};
+
 /**
  * Lights up all possible combinations for a given key
  *
@@ -309,11 +347,12 @@ chromaHCIapp.translateAllKeyNamesToMap = function () {
  */
 chromaHCIapp.lightUpAllPossibleCombintationsForKeyName = function (keyName) {
   // Change color for key pressed to red
-  this.changeColor(this.keyNameToMap[keyName], this.CONSTANTS.color.white);
+  let color = this.getColorByKeyName(keyName);
+  this.changeColorByKeyName(keyName, color);
   // Change all possiblities to red.
   let comb = this.allPossibleKeyCombinations[keyName]
   for (let k in comb) {
-    this.changeColor(comb[k], this.CONSTANTS.color.blue);
+    this.changeColor(comb[k], color);
   }
 };
 
@@ -336,10 +375,10 @@ chromaHCIapp.getKeyByKeyName = function (keyName) {
  * Lights up pressed keys.
  */
 chromaHCIapp.lightUpPressedKeys = function () {
-  let color = this.CONSTANTS.color.red;
-  color = (this.isCorrect) ? this.CONSTANTS.color.green : color;
+  let color = this.CONSTANTS.color.black;
+  color = (this.isCorrect) ? this.CONSTANTS.color.white : color;
   for (let k in this.pressedKeyStack) {
-    this.changeColor( this.keyNameToMap[this.pressedKeyStack[k]], color );
+    this.changeColorByKeyName( this.pressedKeyStack[k], color );
   }
 };
 
@@ -443,13 +482,24 @@ chromaHCIapp.sendResult = function () {
  */
 chromaHCIapp.commandManager = function () {
   let wait = 0;
-  if (this.commandDeck.length == 0 && this.currentCommandDeck == 'train') {
-    this.currentCommandDeck = 'test';
-    this.commandDeck = this.generateCommandDeck('efreq');
-    this.updateFrontEnd('command', 'Starting next phase in 30 secs.');
-    this.updateFrontEnd('result', '');
-    this.log('Test Deck', 'Command Order [' + this.commandDeck + ']');
-    wait = this.CONSTANTS.breakBetweenBlocks;
+  if (this.commandDeck.length == 0) {
+    // Start the testing phase.
+    if (this.currentCommandDeck == 'train') {
+      this.currentCommandDeck = 'test';
+      this.lit = false;
+      this.commandDeck = this.generateCommandDeck('efreq');
+      this.updateFrontEnd('command', 'Starting next phase in 30 secs.');
+      this.updateFrontEnd('result', '');
+      socket.emit('hide_help', { help: 'hide' });
+      this.log('Test Deck', 'Command Order [' + this.commandDeck + ']');
+      wait = this.CONSTANTS.breakBetweenBlocks;
+    }
+    if (this.currentCommandDeck == 'test') {
+      this.updateFrontEnd('command', 'Test Finished');
+      this.updateFrontEnd('result', 'Thanks');
+      this.log('Test Deck', 'Command Order [' + this.commandDeck + ']');
+      return;
+    }
   }
   if (this.currentCommandDeck == 'train' &&
       (this.commandDeck.length % this.CONSTANTS.blockSize) == 0) {
